@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GREEN-API Demo</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+        h1 {
+            text-align: center;
+            color: #25D366;
+            margin-bottom: 30px;
+        }
+        .auth-section {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #25D366;
+        }
+        .buttons-section {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        .btn-get {
+            background: #128C7E;
+            color: white;
+        }
+        .btn-get:hover {
+            background: #0d6b60;
+        }
+        .btn-send {
+            background: #25D366;
+            color: white;
+        }
+        .btn-send:hover {
+            background: #1da851;
+        }
+        .message-section {
+            margin-bottom: 20px;
+        }
+        .message-section input {
+            margin-bottom: 10px;
+        }
+        .file-section {
+            margin-bottom: 20px;
+        }
+        .file-section input {
+            margin-bottom: 10px;
+        }
+        .response-section {
+            background: #1e1e1e;
+            border-radius: 8px;
+            padding: 15px;
+        }
+        .response-section h3 {
+            color: #25D366;
+            margin-bottom: 10px;
+        }
+        textarea {
+            width: 100%;
+            min-height: 200px;
+            background: #2d2d2d;
+            color: #00ff00;
+            border: none;
+            border-radius: 5px;
+            padding: 15px;
+            font-family: 'Consolas', monospace;
+            font-size: 13px;
+            resize: vertical;
+        }
+        .loading {
+            display: none;
+            color: #25D366;
+            margin-top: 10px;
+        }
+        .error {
+            color: #ff4444;
+        }
+        .success {
+            color: #00ff00;
+        }
+        a {
+            color: #25D366;
+        }
+        .header-link {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>GREEN-API Demo</h1>
+        <div class="header-link">
+            <a href="https://green-api.com" target="_blank">green-api.com</a>
+        </div>
+        
+        <!-- Параметры подключения -->
+        <div class="auth-section">
+            <h3>Параметры подключения</h3>
+            <div class="form-group">
+                <label for="idInstance">idInstance:</label>
+                <input type="text" id="idInstance" placeholder="Введите idInstance">
+            </div>
+            <div class="form-group">
+                <label for="apiTokenInstance">ApiTokenInstance:</label>
+                <input type="password" id="apiTokenInstance" placeholder="Введите ApiTokenInstance">
+            </div>
+        </div>
+
+        <!-- Кнопки методов -->
+        <div class="buttons-section">
+            <button class="btn-get" onclick="getSettings()">getSettings</button>
+            <button class="btn-get" onclick="getStateInstance()">getStateInstance</button>
+        </div>
+
+        <!-- Секция отправки сообщения -->
+        <div class="message-section">
+            <h3>SendMessage</h3>
+            <div class="form-group">
+                <label for="chatIdMessage">chatId (например: 79991234567@c.us):</label>
+                <input type="text" id="chatIdMessage" placeholder="Введите chatId">
+            </div>
+            <div class="form-group">
+                <label for="messageText">message:</label>
+                <input type="text" id="messageText" placeholder="Введите текст сообщения">
+            </div>
+            <button class="btn-send" onclick="sendMessage()">sendMessage</button>
+        </div>
+
+        <!-- Секция отправки файла -->
+        <div class="file-section">
+            <h3>SendFileByUrl</h3>
+            <div class="form-group">
+                <label for="chatIdFile">chatId:</label>
+                <input type="text" id="chatIdFile" placeholder="Введите chatId">
+            </div>
+            <div class="form-group">
+                <label for="fileUrl">urlFile:</label>
+                <input type="text" id="fileUrl" placeholder="Введите URL файла">
+            </div>
+            <div class="form-group">
+                <label for="fileName">fileName:</label>
+                <input type="text" id="fileName" placeholder="Например: image.jpg">
+            </div>
+            <div class="form-group">
+                <label for="fileCaption">caption (опционально):</label>
+                <input type="text" id="fileCaption" placeholder="Подпись к файлу">
+            </div>
+            <button class="btn-send" onclick="sendFileByUrl()">sendFileByUrl</button>
+        </div>
+
+        <!-- Поле ответа -->
+        <div class="response-section">
+            <h3>Ответ API:</h3>
+            <textarea id="responseOutput" readonly placeholder="Здесь будет отображаться ответ API..."></textarea>
+            <div class="loading" id="loading">Загрузка...</div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'https://api.green-api.com';
+
+        function getCredentials() {
+            const idInstance = document.getElementById('idInstance').value.trim();
+            const apiTokenInstance = document.getElementById('apiTokenInstance').value.trim();
+            
+            if (!idInstance || !apiTokenInstance) {
+                showError('Введите idInstance и ApiTokenInstance');
+                return null;
+            }
+            return { idInstance, apiTokenInstance };
+        }
+
+        function showResponse(data) {
+            const responseOutput = document.getElementById('responseOutput');
+            responseOutput.value = JSON.stringify(data, null, 2);
+        }
+
+        function showError(message) {
+            const responseOutput = document.getElementById('responseOutput');
+            responseOutput.value = `Ошибка: ${message}`;
+        }
+
+        function setLoading(isLoading) {
+            document.getElementById('loading').style.display = isLoading ? 'block' : 'none';
+        }
+
+        async function apiRequest(method, httpMethod, body = null) {
+            const creds = getCredentials();
+            if (!creds) return;
+
+            const url = `${API_URL}/waInstance${creds.idInstance}/${method}/${creds.apiTokenInstance}`;
+            
+            setLoading(true);
+            try {
+                const options = {
+                    method: httpMethod,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                };
+                
+                if (body) {
+                    options.body = JSON.stringify(body);
+                }
+
+                const response = await fetch(url, options);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    showResponse(data);
+                } else {
+                    showError(data.message || JSON.stringify(data));
+                }
+            } catch (error) {
+                showError(error.message);
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        async function getSettings() {
+            await apiRequest('getSettings', 'GET');
+        }
+
+        async function getStateInstance() {
+            await apiRequest('getStateInstance', 'GET');
+        }
+
+        async function sendMessage() {
+            const chatId = document.getElementById('chatIdMessage').value.trim();
+            const message = document.getElementById('messageText').value.trim();
+            
+            if (!chatId || !message) {
+                showError('Введите chatId и текст сообщения');
+                return;
+            }
+
+            await apiRequest('sendMessage', 'POST', { chatId, message });
+        }
+
+        async function sendFileByUrl() {
+            const chatId = document.getElementById('chatIdFile').value.trim();
+            const urlFile = document.getElementById('fileUrl').value.trim();
+            const fileName = document.getElementById('fileName').value.trim();
+            const caption = document.getElementById('fileCaption').value.trim();
+            
+            if (!chatId || !urlFile || !fileName) {
+                showError('Введите chatId, URL файла и имя файла');
+                return;
+            }
+
+            const body = { chatId, urlFile, fileName };
+            if (caption) {
+                body.caption = caption;
+            }
+
+            await apiRequest('sendFileByUrl', 'POST', body);
+        }
+    </script>
+</body>
+</html>
